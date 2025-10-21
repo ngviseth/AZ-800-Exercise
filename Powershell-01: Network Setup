@@ -1,1 +1,16 @@
-
+Get-NetAdapter | Format-Table -AutoSize
+Get-NetAdapter | Select-Object Name,ifIndex,MacAddress
+Get-NetIpInterface -InterfaceIndex 4 -AddressFamily IPv4 | Format-Table -AutoSize
+Set-NetIpInterface -InterfaceIndex 4 -Dhcp disabled
+Get-NetAdapterBinding -InterfaceAlias Ethernet0 -ComponentID ms_tcpip6
+Set-NetAdapterBinding -InterfaceAlias Ethernet0 -ComponentID ms_tcpip6 -Enabled:$False
+    #Disable-NetAdapterBinding -InterfaceAlias "Ethernet*" -ComponentID ms_tcpip6
+    #Enable-NetAdapterBinding -InterfaceAlias "Ethernet*" -ComponentID ms_tcpip6
+Remove-NetIpAddress -InterfaceAlias "Ethernet0" -AddressFamily IPv4 -Confirm:$False
+Get-NetIpAddress -InterfaceIndex 4 -AddressFamily IPv4 | Select-Object IPAddress
+New-NetIpAddress -InterfaceIndex 4 -IPAddress "10.1.1.2" -PrefixLength 28 -DefaultGateway "10.1.1.1"
+Get-DnsClientServerAddress -AddressFamily IPv4 -InterfaceIndex 4
+Set-DnsClientServerAddress -InterfaceIndex 4 -ResetServerAddresses -Confirm:$False
+ipconfig /all
+Get-NetAdapterAdvancedProperty -InterfaceAlias Ethernet0
+Get-NetRoute -AddressFamily IPv4 | Where-Object -FilterScript {$_.NextHop -ne '0.0.0.0'}
