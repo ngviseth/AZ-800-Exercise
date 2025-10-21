@@ -1,1 +1,12 @@
-
+Get-TimeZone
+Get-TimeZone -ListAvailable | Where-Object -FilterScript {$_.DisplayName -eq '(UTC+07:00) Bangkok, Hanoi, Jakarta'}
+Set-TimeZone -Id 'SE Asia Standard Time'
+Get-Date
+Set-Date -Date '2025-10-21 19:59:30'
+Enable-NetFirewallRule -Name "FPS-ICMP4-ERQ-IN"
+Get-NetFirewallRule -Name "FPS-ICMP4-ERQ-IN"
+Enable-NetFirewallRule -DisplayGroup 'Remote Desktop'
+Get-NetFirewallRule -DisplayGroup 'Remote Desktop'
+Hostname
+Rename-Computer -Newname 'ecne-dc1' -restart -force -confirm:$False
+Add-Computer -DomainName 'testing.com' -Credential (Get-Credential) -Restart -Force -Confirm:$False
