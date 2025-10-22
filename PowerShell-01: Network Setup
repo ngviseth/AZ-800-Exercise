@@ -11,6 +11,7 @@ Get-NetIpAddress -InterfaceIndex 4 -AddressFamily IPv4 | Select-Object IPAddress
 New-NetIpAddress -InterfaceIndex 4 -IPAddress "10.1.1.2" -PrefixLength 28 -DefaultGateway "10.1.1.1"
 Get-DnsClientServerAddress -AddressFamily IPv4 -InterfaceIndex 4
 Set-DnsClientServerAddress -InterfaceIndex 4 -ResetServerAddresses -Confirm:$False
+Set-DnsClientServerAddress -InterfaceIndex 4 -ServerAddresses ("10.1.1.1")
 ipconfig /all
 Get-NetAdapterAdvancedProperty -InterfaceAlias Ethernet0
 Get-NetRoute -AddressFamily IPv4 | Where-Object -FilterScript {$_.NextHop -ne '0.0.0.0'}
