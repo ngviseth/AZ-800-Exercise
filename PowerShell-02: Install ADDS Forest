@@ -1,1 +1,4 @@
-
+Get-WindowsFeature -Name 'AD-Domain-Services'
+        #Get-WindowsFeature | Where-Object -FilterScript {$_.Name -like 'AD-*' -or $_.DisplayName -like 'Directory Domain*'}
+Install-WindowsFeature -Name 'AD-Domain-Services' -IncludeManagementTools -Restart:$False -Confirm:$False
+Install-ADDSForest -DomainName 'ecne.pie' -InstallDNS -SafeModeAdministratorPassword (ConvertTo-SecureString -AsPlainText 'Pa$$w0rd!' -Force)
