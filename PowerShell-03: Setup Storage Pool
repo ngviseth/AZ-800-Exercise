@@ -1,1 +1,4 @@
-
+Get-StorageSustem
+Get-PhysicalDisk | Sort-Object FriendlyName
+        #Get-PhysicalDisk | Select-Object FriendlyName,CanPool,HealthStatus
+        #Get-PhysicalDisk | Format-Table FriendlyName,OperationalStatus,Size,MediaType
