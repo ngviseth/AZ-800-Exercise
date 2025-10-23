@@ -2,3 +2,30 @@ Get-StorageSustem
 Get-PhysicalDisk | Sort-Object FriendlyName
         #Get-PhysicalDisk | Select-Object FriendlyName,CanPool,HealthStatus
         #Get-PhysicalDisk | Format-Table FriendlyName,OperationalStatus,Size,MediaType
+$PhysicalDisks = Get-PhysicalDisk | Where-Object CanPool -eq $True
+New-StoragePool -FriendlyName 'Pool_n1' -StorageSubSystemFriendlyName 'Windows Storage on ecne-srv1' -PhysicalDisks $PhysicalDisks
+Get-StoragePool
+        #RAID 0 (Stripping)
+New-VirtualDisk -StoragePoolFriendlyName 'Pool_n1' -FriendlyName 'vdisk01' -Size 50GB -ProvisioningType Thin -ResiliencySettingName Simple
+        #RAID 1 (Mirroring)
+New-VirtualDisk -StoragePoolFriendlyName 'Pool_n1' -FriendlyName 'vdisk02' -Size 50GB -ProvisioningType Thin -ResiliencySettingName Mirror
+        #RAID 5 (Parity)
+New-VirtualDisk -StoragePoolFriendlyName 'Pool_n1' -FriendlyName 'vdisk03' -Size 50GB -ProvisioningType Thin -ResiliencySettingName Parity
+Get-VirtualDisk
+get-disk | format-table -AutoSize
+Initialize-Disk -Number 6
+New-Partition -DiskNumber 6 -UseMaximumSize -DriveLetter N | Format-Volume -FileSystem NTFS -NewFileSystemLabel 'vdisk01-NTFS'
+New-Partition -DiskNumber 7 -UseMaximumSize -DriveLetter M | Format-Volume -FileSystem NTFS -NewFileSystemLabel 'vdisk02-NTFS'
+New-Partition -DiskNumber 8 -UseMaximumSize -DriveLetter O | Format-Volume -FileSystem NTFS -NewFileSystemLabel 'vdisk03-NTFS'
+        #Check error disk and replacement
+$pool = Get-StoragePool -FriendlyName "Pool_n1"
+$pool | Get-PhysicalDisk | Select FriendlyName, SerialNumber, OperationalStatus, HealthStatus, Usage
+        #$pool | Get-PhysicalDisk | Where-Object -FilterScript {$_.HealthStatus -ne 'Healthy'}
+$newdisk=Get-PhysicalDisk|Where-Object Canpool -eq $true
+Add-PhysicalDisk -StoragePoolFriendlyName 'pool_n1' -PhysicalDisks $newdisk
+Repair-VirtualDisk -FriendlyName "VDisk01"
+$pool | Get-PhysicalDisk | Where-Object -FilterScript {$_.HealthStatus -ne 'Healthy'} | Set-PhysicalDisk -Usage Retired
+        #Set-PhysicalDisk -FriendlyName "Disk3Name" -Usage Retired
+$pool | Get-PhysicalDisk | Where-Object -FilterScript {$_.HealthStatus -ne 'Healthy'}
+$unhealthy = $pool | Get-PhysicalDisk | Where-Object -FilterScript {$_.HealthStatus -ne 'Healthy'}
+Remove-PhysicalDisk -StoragePoolFriendlyName $pool.FriendlyName -PhysicalDisks $unhealthy
