@@ -1,0 +1,22 @@
+        #iSCSI Server
+Install-WindowsFeature FS-iSCSITarget-Server -IncludeManagementTools
+New-IscsiServerTarget -TargetName "ECNE-SRV2" -InitiatorIds IPAddress:10.1.1.4
+New-item -type Directory -Path c:\iSCSI
+New-IscsiVirtualDisk -Path C:\iSCSI\iscsidisk1.vhdx -size 32GB
+Add-IscsiVirtualDiskTargetMapping -TargetName ECNE-SRV2 -Path 'C:\iSCSI\iscsidisk1.vhdx'
+Set-IscsiServerTarget -TargetName ECNE-SRV2 -EnableChap $true -Chap (New-Object PSCredential('iSCSIUser1',(ConvertTo-SecureString -AsPlainText 'i$CSI@123456789' -Force))) -PassThru
+Restart-Service -name WinTarget
+        #iSCSI Initiator
+Start-Service -Name MSiSCSI
+Set-Service -StartupType Automatic -Name MSiSCSI
+        #set a target server to connect:
+New-IscsiTargetPortal -TargetPortalAddress '10.1.1.3'
+Get-IscsiTarget
+Connect-IscsiTarget -NodeAddress 'iqn.1991-05.com.microsoft:ecne-srv1-ecne-srv2-target' -AuthenticationType ONEWAYCHAP -ChapUsername 'iSCSIUser1' -ChapSecret 'i$CSI@123456789' -IsPersistent $true
+Get-IscsiConnection
+Get-Disk | Format-Table -AutoSize -Wrap
+Set-Disk -Number 5 -IsOffline $false
+Initialize-Disk -Number 5 -PartitionStyle GPT
+New-Partition -DiskNumber 5 -UseMaximumSize -DriveLetter N
+Format-Volume -DriveLetter N -FileSystem NTFS -Force
+Get-Volume | Format-Table -AutoSize -Wrap
